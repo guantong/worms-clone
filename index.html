@@ -1,0 +1,1195 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10131e">
+  <link rel="icon" href="data:,">
+  <title>Worms: Pocket Artillery</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      background: #10131e;
+      color: #f5f4ef;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --muted: #a8adbc;
+      --panel: #1a1e2c;
+      --line: #34394b;
+      --mint: #9ef4c1;
+      --pink: #ff91ad;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      padding: 28px 20px 36px;
+      background:
+        radial-gradient(ellipse at 50% -15%, #30374d 0, transparent 57%),
+        #10131e;
+    }
+
+    button { font: inherit; }
+
+    .game-shell {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+    }
+
+    .masthead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin: 0 2px 18px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 44px;
+      height: 44px;
+      place-items: center;
+      border: 1px solid #58634f;
+      border-radius: 14px;
+      background: #27372e;
+      color: var(--mint);
+      font-size: 25px;
+      transform: rotate(-7deg);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(19px, 3vw, 26px);
+      letter-spacing: .02em;
+    }
+
+    .subtitle {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .round-pill {
+      padding: 9px 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #1b2030;
+      color: #d7d9e2;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      white-space: nowrap;
+    }
+
+    .arena {
+      overflow: hidden;
+      border: 1px solid #3a4053;
+      border-radius: 18px;
+      background: #161a27;
+      box-shadow: 0 24px 70px #0005, 0 3px 0 #ffffff08 inset;
+    }
+
+    .scoreboard {
+      display: grid;
+      grid-template-columns: 1fr minmax(190px, 1.15fr) 1fr;
+      align-items: center;
+      gap: 14px;
+      padding: 15px 19px;
+      border-bottom: 1px solid #34394a;
+      background: linear-gradient(180deg, #202536, #191e2b);
+    }
+
+    .player-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .player-card.right {
+      justify-content: flex-end;
+      text-align: right;
+    }
+
+    .player-dot {
+      flex: 0 0 10px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--mint);
+      box-shadow: 0 0 13px currentColor;
+    }
+
+    .right .player-dot { background: var(--pink); }
+
+    .player-name {
+      display: block;
+      margin-bottom: 3px;
+      color: #f4f2ee;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .1em;
+    }
+
+    .health-line {
+      color: var(--muted);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .turn-message {
+      text-align: center;
+    }
+
+    .turn-title {
+      color: var(--mint);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: .13em;
+    }
+
+    .turn-hint {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .right .player-name, .right .health-line { text-align: right; }
+
+    .canvas-wrap {
+      position: relative;
+      overflow: hidden;
+      background: #82c9dc;
+      line-height: 0;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 25 / 14;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    canvas.dragging { cursor: grabbing; }
+
+    .canvas-caption {
+      position: absolute;
+      right: 14px;
+      bottom: 11px;
+      padding: 6px 9px;
+      border: 1px solid #ffffff30;
+      border-radius: 7px;
+      background: #11182766;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .09em;
+      line-height: 1;
+      pointer-events: none;
+      text-shadow: 0 1px 4px #0008;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto auto;
+      align-items: center;
+      gap: 16px;
+      padding: 15px 18px;
+      border-top: 1px solid #34394a;
+      background: #191e2b;
+    }
+
+    .setting {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .setting-label {
+      color: #c8cbd5;
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .1em;
+    }
+
+    .setting-value {
+      color: #f8f7f4;
+      font-size: 13px;
+      font-weight: 800;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .control-button {
+      min-width: 33px;
+      height: 33px;
+      padding: 0 9px;
+      border: 1px solid #42485b;
+      border-radius: 9px;
+      background: #252b3b;
+      color: #f3f2ed;
+      font-weight: 800;
+      cursor: pointer;
+      transition: background .15s ease, transform .15s ease, border-color .15s ease;
+    }
+
+    .control-button:hover:not(:disabled) {
+      border-color: #747d96;
+      background: #30374a;
+      transform: translateY(-1px);
+    }
+
+    .control-button:focus-visible {
+      outline: 2px solid var(--mint);
+      outline-offset: 2px;
+    }
+
+    .control-button:disabled {
+      cursor: not-allowed;
+      opacity: .45;
+    }
+
+    .fire-button {
+      min-width: 142px;
+      height: 42px;
+      border: 0;
+      border-radius: 11px;
+      background: linear-gradient(135deg, #a5f5c5, #69dba2);
+      color: #14241c;
+      font-size: 12px;
+      font-weight: 1000;
+      letter-spacing: .1em;
+      box-shadow: 0 4px 16px #7be9ad25;
+    }
+
+    .fire-button:hover:not(:disabled) {
+      background: linear-gradient(135deg, #c2ffda, #7debb3);
+    }
+
+    .footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 18px 14px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .footer-actions {
+      display: flex;
+      flex: 0 0 auto;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .key-hint {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      align-items: center;
+    }
+
+    kbd {
+      padding: 3px 6px;
+      border: 1px solid #444a5c;
+      border-radius: 5px;
+      background: #232838;
+      color: #e8e8ed;
+      font-family: inherit;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .new-map {
+      height: 34px;
+      padding: 0 12px;
+      color: #d8dbe5;
+      white-space: nowrap;
+    }
+
+    .wind-toggle {
+      height: 34px;
+      padding: 0 11px;
+      white-space: nowrap;
+    }
+
+    .wind-toggle[aria-pressed="true"] {
+      border-color: #587d68;
+      background: #263a30;
+      color: var(--mint);
+    }
+
+    @media (max-width: 720px) {
+      body { padding: 18px 10px 24px; }
+      .masthead { margin-bottom: 13px; }
+      .scoreboard {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        padding: 12px;
+      }
+      .turn-message {
+        grid-column: 1 / -1;
+        grid-row: 2;
+        padding-top: 8px;
+        border-top: 1px solid #34394a;
+      }
+      .controls {
+        grid-template-columns: 1fr 1fr;
+        gap: 13px;
+        padding: 13px;
+      }
+      .setting { gap: 6px; }
+      .move-setting { grid-column: 1 / -1; }
+      .fire-button { grid-column: 1 / -1; width: 100%; }
+      .footer { padding: 10px 13px 13px; }
+    }
+
+    @media (max-width: 430px) {
+      .subtitle { font-size: 11px; }
+      .brand-mark { width: 38px; height: 38px; }
+      .round-pill { padding: 8px 9px; font-size: 9px; }
+      .setting { display: grid; grid-template-columns: minmax(0, 1fr) 30px 38px 30px; gap: 6px; }
+      .setting-label { grid-column: 1 / -1; margin-right: 0; }
+      .setting-value { grid-column: 3; grid-row: 2; }
+      .setting .control-button:last-of-type { grid-column: 4; grid-row: 2; }
+      .setting .control-button:first-of-type { grid-column: 2; grid-row: 2; }
+      .footer { align-items: flex-start; }
+      .key-hint { gap: 5px; }
+      .footer-actions { gap: 6px; }
+      .wind-toggle, .new-map { padding: 0 8px; font-size: 10px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="game-shell">
+    <header class="masthead">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">〰</div>
+        <div>
+          <h1>Worms: Pocket Artillery</h1>
+          <p class="subtitle">Two worms. One rocket. A very questionable landscape.</p>
+        </div>
+      </div>
+      <div class="round-pill" id="roundLabel">ROUND 1</div>
+    </header>
+
+    <section class="arena" aria-label="Two player artillery game">
+      <div class="scoreboard">
+        <div class="player-card">
+          <span class="player-dot" aria-hidden="true"></span>
+          <div>
+            <span class="player-name">MINT SQUAD</span>
+            <span class="health-line" id="health0">100 HP</span>
+          </div>
+        </div>
+        <div class="turn-message" aria-live="polite">
+          <div class="turn-title" id="turnTitle">MINT SQUAD'S TURN</div>
+          <div class="turn-hint" id="statusText">Set your aim, then fire!</div>
+        </div>
+        <div class="player-card right">
+          <div>
+            <span class="player-name">BERRY BLASTERS</span>
+            <span class="health-line" id="health1">100 HP</span>
+          </div>
+          <span class="player-dot" aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="gameCanvas" width="1000" height="560" aria-label="Game field. Drag your active worm up to 20 pixels horizontally to move, or click to aim."></canvas>
+        <div class="canvas-caption" id="windLabel">WIND: CALM</div>
+      </div>
+
+      <div class="controls">
+        <div class="setting" aria-label="Angle controls">
+          <span class="setting-label">ANGLE</span>
+          <button class="control-button" data-action="angleDown" aria-label="Lower angle">−</button>
+          <span class="setting-value" id="angleValue">45°</span>
+          <button class="control-button" data-action="angleUp" aria-label="Raise angle">+</button>
+        </div>
+        <div class="setting" aria-label="Power controls">
+          <span class="setting-label">POWER</span>
+          <button class="control-button" data-action="powerDown" aria-label="Lower power">−</button>
+          <span class="setting-value" id="powerValue">72%</span>
+          <button class="control-button" data-action="powerUp" aria-label="Raise power">+</button>
+        </div>
+        <div class="setting move-setting" aria-label="Movement controls">
+          <span class="setting-label">MOVE</span>
+          <button class="control-button" data-move="-1" aria-label="Move left 20 pixels">←</button>
+          <span class="setting-value" id="moveValue">20 PX</span>
+          <button class="control-button" data-move="1" aria-label="Move right 20 pixels">→</button>
+        </div>
+        <button class="control-button fire-button" id="fireButton">FIRE ROCKET&nbsp; ↗</button>
+      </div>
+
+      <div class="footer">
+        <div class="key-hint" aria-label="Keyboard controls">
+          <span><kbd>↑</kbd><kbd>↓</kbd> angle</span>
+          <span><kbd>←</kbd><kbd>→</kbd> power</span>
+          <span>DRAG / <kbd>A</kbd><kbd>D</kbd> move 20px</span>
+          <span><kbd>SPACE</kbd> fire</span>
+          <span><kbd>N</kbd> new map</span>
+        </div>
+        <div class="footer-actions">
+          <button class="control-button wind-toggle" id="windToggleButton" type="button" aria-label="Turn random wind off" aria-pressed="true" title="Random wind changes speed and direction each turn">WIND ON</button>
+          <button class="control-button new-map" id="newMapButton">↻ &nbsp;NEW MAP</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      const width = canvas.width;
+      const height = canvas.height;
+      const angleValue = document.getElementById("angleValue");
+      const powerValue = document.getElementById("powerValue");
+      const moveValue = document.getElementById("moveValue");
+      const fireButton = document.getElementById("fireButton");
+      const windToggleButton = document.getElementById("windToggleButton");
+      const newMapButton = document.getElementById("newMapButton");
+      const statusText = document.getElementById("statusText");
+      const turnTitle = document.getElementById("turnTitle");
+      const roundLabel = document.getElementById("roundLabel");
+      const windLabel = document.getElementById("windLabel");
+      const healthLabels = [
+        document.getElementById("health0"),
+        document.getElementById("health1")
+      ];
+      const playerColors = ["#9ef4c1", "#ff91ad"];
+      const playerNames = ["MINT SQUAD", "BERRY BLASTERS"];
+      const aims = [
+        { angle: 45, power: 72 },
+        { angle: 45, power: 72 }
+      ];
+
+      let terrain;
+      let players;
+      let currentPlayer = 0;
+      let turnNumber = 1;
+      let wind = 0;
+      let windEnabled = true;
+      let moveUsed = false;
+      let projectile = null;
+      let explosion = null;
+      let dragState = null;
+      let suppressCanvasClick = false;
+      let phase = "aim";
+      let status = "";
+      let lastTime = 0;
+      let sceneTime = 0;
+
+      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+      const randomWind = () => (Math.random() < 0.5 ? -1 : 1) * (Math.floor(Math.random() * 9) + 2) / 10;
+      const groundAt = (x) => {
+        const safeX = clamp(x, 0, width - 1);
+        const index = Math.floor(safeX);
+        const fraction = safeX - index;
+        return terrain[index] * (1 - fraction) + terrain[index + 1] * fraction;
+      };
+
+      function createTerrain() {
+        const seedA = Math.random() * Math.PI * 2;
+        const seedB = Math.random() * Math.PI * 2;
+        const peaks = Array.from({ length: 14 }, () => Math.random() * 2 - 1);
+        const result = new Float32Array(width + 1);
+        for (let x = 0; x <= width; x += 1) {
+          const segment = x / 78;
+          const index = Math.floor(segment);
+          const blend = segment - index;
+          const smooth = blend * blend * (3 - 2 * blend);
+          const ridge = peaks[index] * (1 - smooth) + peaks[Math.min(index + 1, peaks.length - 1)] * smooth;
+          const rolling = 407
+            + Math.sin(x * 0.006 + seedA) * 39
+            + Math.sin(x * 0.015 + seedB) * 19
+            + ridge * 38;
+          result[x] = clamp(rolling, 296, 472);
+        }
+        return result;
+      }
+
+      function resetGame() {
+        terrain = createTerrain();
+        players = [
+          { x: 142, y: groundAt(142), vx: 0, vy: 0, health: 100, alive: true },
+          { x: 858, y: groundAt(858), vx: 0, vy: 0, health: 100, alive: true }
+        ];
+        currentPlayer = 0;
+        turnNumber = 1;
+        moveUsed = false;
+        wind = windEnabled ? randomWind() : 0;
+        projectile = null;
+        explosion = null;
+        phase = "aim";
+        aims[0] = { angle: 45, power: 72 };
+        aims[1] = { angle: 45, power: 72 };
+        setStatus("Set your aim, then fire!");
+        updateHud();
+      }
+
+      function setStatus(message) {
+        status = message;
+        statusText.textContent = message;
+      }
+
+      function updateHud() {
+        const aim = aims[currentPlayer];
+        turnTitle.textContent = phase === "gameover"
+          ? `${playerNames[1 - currentPlayer]} WINS!`
+          : `${playerNames[currentPlayer]}'S TURN`;
+        turnTitle.style.color = playerColors[currentPlayer];
+        roundLabel.textContent = `ROUND ${Math.ceil(turnNumber / 2)}`;
+        angleValue.textContent = `${aim.angle}°`;
+        powerValue.textContent = `${aim.power}%`;
+        moveValue.textContent = moveUsed ? "USED" : "20 PX";
+        healthLabels.forEach((label, index) => {
+          label.textContent = `${Math.max(0, players[index].health)} HP${players[index].alive ? "" : " · OUT"}`;
+          label.style.color = players[index].alive ? "" : "#ff687f";
+        });
+        windLabel.textContent = !windEnabled
+          ? "WIND: OFF"
+          : `WIND: ${wind > 0 ? "→" : "←"} ${Math.abs(wind).toFixed(1)}`;
+        const canAim = phase === "aim";
+        const canMove = canAim && !moveUsed && players[currentPlayer].alive;
+        windToggleButton.textContent = windEnabled ? "WIND ON" : "WIND OFF";
+        windToggleButton.setAttribute("aria-pressed", String(windEnabled));
+        windToggleButton.setAttribute("aria-label", `Turn random wind ${windEnabled ? "off" : "on"}`);
+        document.querySelectorAll("[data-action]").forEach((button) => {
+          button.disabled = !canAim;
+        });
+        fireButton.disabled = !canAim;
+        windToggleButton.disabled = !canAim;
+        document.querySelectorAll("[data-move]").forEach((button) => {
+          button.disabled = !canMove;
+        });
+      }
+
+      function toggleWind() {
+        if (phase !== "aim") return;
+        windEnabled = !windEnabled;
+        wind = windEnabled ? randomWind() : 0;
+        setStatus(windEnabled
+          ? "Random wind is on and changes each turn."
+          : "Wind is off.");
+        updateHud();
+      }
+
+      function movePlayer(direction) {
+        if (phase !== "aim" || moveUsed) return;
+        const player = players[currentPlayer];
+        if (!player.alive) return;
+        const step = Math.sign(direction) * 20;
+        const nextX = player.x + step;
+        const otherPlayer = players[1 - currentPlayer];
+        if (nextX < 20 || nextX > width - 20 || (otherPlayer.alive && Math.abs(nextX - otherPlayer.x) < 24)) {
+          setStatus("No room to move 20px that way.");
+          return;
+        }
+        const heightAboveGround = Math.max(0, groundAt(player.x) - player.y);
+        player.x = nextX;
+        player.y = groundAt(nextX) - heightAboveGround;
+        player.vx = 0;
+        moveUsed = true;
+        setStatus(`${playerNames[currentPlayer]} moved 20px ${direction < 0 ? "left" : "right"}.`);
+        updateHud();
+      }
+
+      function canvasPoint(event) {
+        const bounds = canvas.getBoundingClientRect();
+        return {
+          x: (event.clientX - bounds.left) * width / bounds.width,
+          y: (event.clientY - bounds.top) * height / bounds.height
+        };
+      }
+
+      function isWormHit(point, player) {
+        return Math.abs(point.x - player.x) <= 25
+          && point.y >= player.y - 38
+          && point.y <= player.y + 5;
+      }
+
+      function finishDrag(cancelled = false) {
+        if (!dragState) return;
+        const drag = dragState;
+        const player = players[drag.playerIndex];
+        dragState = null;
+        canvas.classList.remove("dragging");
+        if (cancelled) {
+          player.x = drag.startX;
+          player.y = drag.startY;
+          player.vx = drag.startVx;
+          player.vy = drag.startVy;
+          suppressCanvasClick = false;
+        } else {
+          const moved = Math.abs(player.x - drag.startX);
+          if (moved > 0.5) {
+            moveUsed = true;
+            setStatus(`${playerNames[drag.playerIndex]} moved ${Math.round(moved)}px ${player.x < drag.startX ? "left" : "right"}.`);
+          }
+          suppressCanvasClick = true;
+          window.setTimeout(() => { suppressCanvasClick = false; }, 0);
+        }
+        updateHud();
+      }
+
+      function changeAim(property, amount) {
+        if (phase !== "aim") return;
+        const aim = aims[currentPlayer];
+        aim[property] = property === "angle"
+          ? clamp(aim.angle + amount, 8, 82)
+          : clamp(aim.power + amount, 25, 100);
+        updateHud();
+      }
+
+      function fire() {
+        if (phase !== "aim" || !players[currentPlayer].alive) return;
+        const player = players[currentPlayer];
+        const aim = aims[currentPlayer];
+        const direction = currentPlayer === 0 ? 1 : -1;
+        const radians = aim.angle * Math.PI / 180;
+        const speed = 6.5 + aim.power * 0.09;
+        const startX = player.x + direction * 19;
+        const startY = player.y - 27;
+        projectile = {
+          x: startX,
+          y: startY,
+          vx: direction * Math.cos(radians) * speed,
+          vy: -Math.sin(radians) * speed,
+          owner: currentPlayer,
+          age: 0,
+          trail: []
+        };
+        phase = "flight";
+        setStatus(`${playerNames[currentPlayer]} launched a rocket!`);
+        updateHud();
+      }
+
+      function detonate(x, y) {
+        if (!projectile) return;
+        const radius = 54;
+        const craterRadius = 43;
+        const damageReport = [];
+        for (let sample = Math.max(0, Math.floor(x - craterRadius)); sample <= Math.min(width, Math.ceil(x + craterRadius)); sample += 1) {
+          const distance = Math.abs(sample - x);
+          const ratio = distance / craterRadius;
+          const surface = terrain[sample];
+          const blastDepth = clamp(1 - Math.max(0, surface - y) / 115, 0, 1);
+          terrain[sample] = Math.min(height - 20, surface + Math.sqrt(Math.max(0, 1 - ratio * ratio)) * 45 * blastDepth);
+        }
+
+        players.forEach((player, index) => {
+          if (!player.alive) return;
+          const distance = Math.hypot(player.x - x, player.y - 25 - y);
+          const reach = radius + 18;
+          if (distance < reach) {
+            const damage = Math.max(1, Math.round(78 * (1 - distance / reach)));
+            player.health = Math.max(0, player.health - damage);
+            const push = distance < 1 ? (index === 0 ? -1 : 1) : (player.x - x) / distance;
+            player.vx += push * (2.5 + damage * 0.045);
+            player.vy -= 2.5 + damage * 0.055;
+            damageReport.push(`${playerNames[index]} −${damage}`);
+            if (player.health <= 0) player.alive = false;
+          }
+        });
+
+        explosion = { x, y, radius, age: 0 };
+        projectile = null;
+        phase = "explosion";
+        setStatus(damageReport.length ? damageReport.join("   ·   ") : "Boom! The landscape will remember that.");
+        updateHud();
+      }
+
+      function finishTurn() {
+        explosion = null;
+        const survivor = players.findIndex((player) => !player.alive);
+        if (survivor !== -1) {
+          phase = "gameover";
+          setStatus(`${playerNames[1 - survivor]} takes the win. New map?");
+        } else {
+          currentPlayer = 1 - currentPlayer;
+          turnNumber += 1;
+          moveUsed = false;
+          if (windEnabled) wind = randomWind();
+          phase = "aim";
+          setStatus(`${playerNames[currentPlayer]}, line up your shot!`);
+        }
+        updateHud();
+      }
+
+      function updatePlayers() {
+        players.forEach((player) => {
+          if (!player.alive) return;
+          player.vy += 0.22;
+          player.x += player.vx;
+          player.y += player.vy;
+          player.vx *= 0.91;
+          if (player.x < 20 || player.x > width - 20) {
+            player.x = clamp(player.x, 20, width - 20);
+            player.vx *= -0.35;
+          }
+          const ground = groundAt(player.x);
+          if (player.y >= ground) {
+            player.y = ground;
+            player.vy = 0;
+          }
+          if (player.y > height + 35) {
+            player.alive = false;
+            player.health = 0;
+          }
+        });
+      }
+
+      function update() {
+        updatePlayers();
+        if (projectile) {
+          const rocket = projectile;
+          rocket.trail.push({ x: rocket.x, y: rocket.y });
+          if (rocket.trail.length > 13) rocket.trail.shift();
+          rocket.vx += wind * 0.012;
+          rocket.x += rocket.vx;
+          rocket.y += rocket.vy;
+          rocket.vy += 0.19;
+          rocket.age += 1;
+
+          const target = players[1 - rocket.owner];
+          const hitWorm = target.alive && Math.hypot(rocket.x - target.x, rocket.y - target.y + 24) < 16;
+          if (hitWorm || rocket.y >= groundAt(rocket.x) || rocket.x < 0 || rocket.x > width || rocket.y > height) {
+            detonate(clamp(rocket.x, 0, width), clamp(rocket.y, 25, height - 10));
+          } else if (rocket.age > 220) {
+            detonate(clamp(rocket.x, 0, width), clamp(rocket.y, 25, height - 10));
+          }
+        }
+        if (explosion) {
+          explosion.age += 1;
+          if (explosion.age > 48) finishTurn();
+        }
+      }
+
+      function drawSky() {
+        const sky = ctx.createLinearGradient(0, 0, 0, height);
+        sky.addColorStop(0, "#72b9d5");
+        sky.addColorStop(0.58, "#b0e4dc");
+        sky.addColorStop(1, "#f3d9a4");
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, width, height);
+
+        const sun = ctx.createRadialGradient(765, 105, 5, 765, 105, 72);
+        sun.addColorStop(0, "#fff6c8dd");
+        sun.addColorStop(0.23, "#ffe9a788");
+        sun.addColorStop(1, "#ffe9a700");
+        ctx.fillStyle = sun;
+        ctx.beginPath();
+        ctx.arc(765, 105, 72, 0, Math.PI * 2);
+        ctx.fill();
+
+        drawCloud(194 + Math.sin(sceneTime * 0.00008) * 14, 112, 0.9);
+        drawCloud(534 + Math.sin(sceneTime * 0.00006 + 2) * 11, 77, 0.62);
+        drawCloud(883 + Math.sin(sceneTime * 0.00007 + 1) * 13, 173, 0.74);
+
+        ctx.fillStyle = "#639da9";
+        ctx.beginPath();
+        ctx.moveTo(0, 365);
+        for (let x = 0; x <= width; x += 4) {
+          const y = 337 + Math.sin(x * 0.009 + 1.2) * 27 + Math.sin(x * 0.021) * 10;
+          ctx.lineTo(x, y);
+        }
+        ctx.lineTo(width, height);
+        ctx.lineTo(0, height);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#83b5a9";
+        ctx.beginPath();
+        ctx.moveTo(0, 410);
+        for (let x = 0; x <= width; x += 4) {
+          ctx.lineTo(x, 384 + Math.sin(x * 0.008 + 2.4) * 25 + Math.sin(x * 0.016 + 0.4) * 12);
+        }
+        ctx.lineTo(width, height);
+        ctx.lineTo(0, height);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      function drawCloud(x, y, scale) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.scale(scale, scale);
+        ctx.fillStyle = "#ffffff70";
+        ctx.beginPath();
+        ctx.ellipse(0, 9, 39, 13, 0, 0, Math.PI * 2);
+        ctx.ellipse(-19, 1, 18, 15, 0, 0, Math.PI * 2);
+        ctx.ellipse(1, -6, 23, 20, 0, 0, Math.PI * 2);
+        ctx.ellipse(23, 2, 17, 14, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawTerrain() {
+        const soil = ctx.createLinearGradient(0, 360, 0, height);
+        soil.addColorStop(0, "#54743e");
+        soil.addColorStop(0.12, "#795c3b");
+        soil.addColorStop(1, "#483c39");
+        ctx.beginPath();
+        ctx.moveTo(0, height);
+        ctx.lineTo(0, terrain[0]);
+        for (let x = 0; x <= width; x += 2) ctx.lineTo(x, terrain[x]);
+        ctx.lineTo(width, height);
+        ctx.closePath();
+        ctx.fillStyle = soil;
+        ctx.fill();
+
+        ctx.beginPath();
+        for (let x = 0; x <= width; x += 2) {
+          if (x === 0) ctx.moveTo(x, terrain[x]);
+          else ctx.lineTo(x, terrain[x]);
+        }
+        ctx.strokeStyle = "#c7a76a";
+        ctx.lineWidth = 5;
+        ctx.lineJoin = "round";
+        ctx.stroke();
+        ctx.strokeStyle = "#a5bd6b";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        for (let x = 16; x < width; x += 23) {
+          const y = groundAt(x);
+          ctx.strokeStyle = "#d1c87999";
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(x, y + 1);
+          ctx.lineTo(x - 3, y - 5 - (x % 3));
+          ctx.moveTo(x, y + 1);
+          ctx.lineTo(x + 3, y - 4);
+          ctx.stroke();
+        }
+      }
+
+      function drawAimGuide() {
+        if (phase !== "aim") return;
+        const player = players[currentPlayer];
+        if (!player.alive) return;
+        const aim = aims[currentPlayer];
+        const direction = currentPlayer === 0 ? 1 : -1;
+        const radians = aim.angle * Math.PI / 180;
+        const speed = 6.5 + aim.power * 0.09;
+        let x = player.x + direction * 19;
+        let y = player.y - 27;
+        let vx = direction * Math.cos(radians) * speed;
+        let vy = -Math.sin(radians) * speed;
+        const points = [];
+        for (let step = 0; step < 86; step += 1) {
+          vx += wind * 0.012;
+          x += vx;
+          y += vy;
+          vy += 0.19;
+          points.push({ x, y });
+          if (x < 0 || x > width || y >= groundAt(x)) break;
+        }
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        points.slice(1).forEach((point) => ctx.lineTo(point.x, point.y));
+        ctx.setLineDash([10, 8]);
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+        ctx.strokeStyle = "#17202c";
+        ctx.lineWidth = 7;
+        ctx.stroke();
+        ctx.strokeStyle = currentPlayer === 0 ? "#f7ff67" : "#ff668d";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      function drawPlayer(player, index) {
+        if (!player.alive) return;
+        const active = phase === "aim" && index === currentPlayer;
+        const color = playerColors[index];
+        const direction = index === 0 ? 1 : -1;
+        const headY = player.y - 24;
+
+        if (active) {
+          ctx.beginPath();
+          ctx.ellipse(player.x, player.y + 3, 26, 8, 0, 0, Math.PI * 2);
+          ctx.fillStyle = "#18291f33";
+          ctx.fill();
+        }
+
+        ctx.lineCap = "round";
+        for (let segment = 0; segment < 4; segment += 1) {
+          const sx = player.x - direction * (segment * 7 - 7);
+          const sy = player.y - 12 - Math.sin(segment * 0.7) * 3;
+          ctx.beginPath();
+          ctx.arc(sx, sy, 8 - segment * 0.7, 0, Math.PI * 2);
+          ctx.fillStyle = segment > 1 ? (index === 0 ? "#65c992" : "#e76889") : color;
+          ctx.fill();
+        }
+        ctx.beginPath();
+        ctx.arc(player.x, headY, 12, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = "#25372f";
+        ctx.stroke();
+
+        const eyeX = player.x + direction * 4;
+        ctx.fillStyle = "#fffdf2";
+        ctx.beginPath();
+        ctx.ellipse(eyeX, headY - 2, 4.2, 5.1, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#20232b";
+        ctx.beginPath();
+        ctx.arc(eyeX + direction * 1.2, headY - 1.4, 1.7, 0, Math.PI * 2);
+        ctx.fill();
+
+        const aim = aims[index];
+        const radians = aim.angle * Math.PI / 180;
+        const barrelEndX = player.x + direction * (17 + Math.cos(radians) * 24);
+        const barrelEndY = headY - Math.sin(radians) * 24;
+        ctx.beginPath();
+        ctx.moveTo(player.x + direction * 13, headY - 1);
+        ctx.lineTo(barrelEndX, barrelEndY);
+        ctx.strokeStyle = "#373b47";
+        ctx.lineWidth = 5;
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(player.x + direction * 13, headY - 1);
+        ctx.lineTo(barrelEndX, barrelEndY);
+        ctx.strokeStyle = "#d6d2c5";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        const health = clamp(player.health, 0, 100);
+        const healthWidth = 52;
+        const healthX = player.x - healthWidth / 2;
+        const healthY = player.y - 64;
+        ctx.fillStyle = "#17202ce8";
+        ctx.fillRect(player.x - 30, player.y - 83, 60, 24);
+        ctx.font = "800 9px Trebuchet MS, sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "alphabetic";
+        ctx.fillStyle = "#fffdf2";
+        ctx.fillText(`${health} HP`, player.x, player.y - 69);
+        ctx.fillStyle = "#343b48";
+        ctx.fillRect(healthX, healthY, healthWidth, 5);
+        ctx.fillStyle = health > 50 ? color : health > 25 ? "#ffd166" : "#ff637d";
+        ctx.fillRect(healthX, healthY, healthWidth * health / 100, 5);
+
+        if (active) {
+          ctx.font = "800 10px Trebuchet MS, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillStyle = "#24333a";
+          ctx.fillText("YOUR TURN", player.x, player.y - 50);
+        }
+      }
+
+      function drawProjectile() {
+        if (!projectile) return;
+        ctx.lineCap = "round";
+        for (let i = 0; i < projectile.trail.length; i += 1) {
+          const point = projectile.trail[i];
+          const alpha = (i + 1) / (projectile.trail.length + 2);
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 1.3 + alpha * 2, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255, 130, 63, ${alpha * 0.65})`;
+          ctx.fill();
+        }
+        const angle = Math.atan2(projectile.vy, projectile.vx);
+        ctx.save();
+        ctx.translate(projectile.x, projectile.y);
+        ctx.rotate(angle);
+        ctx.fillStyle = "#ffb347";
+        ctx.beginPath();
+        ctx.moveTo(-7, 0);
+        ctx.lineTo(-17, -4);
+        ctx.lineTo(-14, 0);
+        ctx.lineTo(-17, 4);
+        ctx.closePath();
+        ctx.fill();
+        ctx.fillStyle = "#e9edf0";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 9, 4, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#576071";
+        ctx.beginPath();
+        ctx.moveTo(5, -3.5);
+        ctx.lineTo(11, 0);
+        ctx.lineTo(5, 3.5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function drawExplosion() {
+        if (!explosion) return;
+        const progress = clamp(explosion.age / 13, 0, 1);
+        const radius = explosion.radius * progress;
+        const glow = ctx.createRadialGradient(explosion.x, explosion.y, 2, explosion.x, explosion.y, radius + 4);
+        glow.addColorStop(0, "#fff8c9ee");
+        glow.addColorStop(0.28, "#ffcf64dd");
+        glow.addColorStop(0.68, "#ff773bbb");
+        glow.addColorStop(1, "#ed442000");
+        ctx.fillStyle = glow;
+        ctx.beginPath();
+        ctx.arc(explosion.x, explosion.y, radius + 4, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (explosion.age < 18) {
+          ctx.beginPath();
+          ctx.arc(explosion.x, explosion.y, radius * 0.72, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(255, 245, 186, ${1 - explosion.age / 18})`;
+          ctx.lineWidth = 4;
+          ctx.stroke();
+        }
+      }
+
+      function draw() {
+        drawSky();
+        drawTerrain();
+        drawAimGuide();
+        players.forEach(drawPlayer);
+        drawProjectile();
+        drawExplosion();
+      }
+
+      function frame(timestamp) {
+        const elapsed = lastTime ? Math.min(timestamp - lastTime, 40) : 16;
+        lastTime = timestamp;
+        sceneTime += elapsed;
+        if (phase === "flight" || phase === "explosion" || players.some((player) => player.vy !== 0 || Math.abs(player.vx) > 0.08)) {
+          update();
+        }
+        draw();
+        requestAnimationFrame(frame);
+      }
+
+      document.querySelectorAll("[data-action]").forEach((button) => {
+        button.addEventListener("click", () => {
+          switch (button.dataset.action) {
+            case "angleDown": changeAim("angle", -2); break;
+            case "angleUp": changeAim("angle", 2); break;
+            case "powerDown": changeAim("power", -5); break;
+            case "powerUp": changeAim("power", 5); break;
+          }
+        });
+      });
+
+      document.querySelectorAll("[data-move]").forEach((button) => {
+        button.addEventListener("click", () => movePlayer(Number(button.dataset.move)));
+      });
+
+      fireButton.addEventListener("click", fire);
+      windToggleButton.addEventListener("click", toggleWind);
+      newMapButton.addEventListener("click", resetGame);
+
+      window.addEventListener("keydown", (event) => {
+        if (event.target instanceof HTMLElement && event.target.closest("button")) {
+          if (event.code === "Space") event.preventDefault();
+          return;
+        }
+        switch (event.code) {
+          case "ArrowUp": changeAim("angle", 2); event.preventDefault(); break;
+          case "ArrowDown": changeAim("angle", -2); event.preventDefault(); break;
+          case "ArrowRight": changeAim("power", 5); event.preventDefault(); break;
+          case "ArrowLeft": changeAim("power", -5); event.preventDefault(); break;
+          case "KeyA": movePlayer(-1); break;
+          case "KeyD": movePlayer(1); break;
+          case "Space": fire(); event.preventDefault(); break;
+          case "KeyN": resetGame(); break;
+        }
+      });
+
+      canvas.addEventListener("pointerdown", (event) => {
+        if (event.button !== 0 || phase !== "aim") return;
+        const player = players[currentPlayer];
+        if (!player.alive || !isWormHit(canvasPoint(event), player)) return;
+        event.preventDefault();
+        if (moveUsed) {
+          setStatus("Movement already used this turn.");
+          suppressCanvasClick = true;
+          window.setTimeout(() => { suppressCanvasClick = false; }, 0);
+          return;
+        }
+        dragState = {
+          pointerId: event.pointerId,
+          playerIndex: currentPlayer,
+          startX: player.x,
+          startY: player.y,
+          startVx: player.vx,
+          startVy: player.vy,
+          startPointerX: canvasPoint(event).x
+        };
+        canvas.setPointerCapture(event.pointerId);
+        canvas.classList.add("dragging");
+      });
+
+      canvas.addEventListener("pointermove", (event) => {
+        if (!dragState) {
+          const player = players[currentPlayer];
+          canvas.style.cursor = phase === "aim" && !moveUsed && player.alive && isWormHit(canvasPoint(event), player)
+            ? "grab"
+            : "";
+          return;
+        }
+        if (event.pointerId !== dragState.pointerId) return;
+        const drag = dragState;
+        const player = players[drag.playerIndex];
+        const offset = clamp(canvasPoint(event).x - drag.startPointerX, -20, 20);
+        const nextX = drag.startX + offset;
+        const otherPlayer = players[1 - drag.playerIndex];
+        if (nextX < 20 || nextX > width - 20 || (otherPlayer.alive && Math.abs(nextX - otherPlayer.x) < 24)) return;
+        player.x = nextX;
+        player.y = groundAt(nextX);
+        player.vx = 0;
+        player.vy = 0;
+      });
+
+      canvas.addEventListener("pointerup", (event) => {
+        if (dragState && event.pointerId === dragState.pointerId) finishDrag();
+      });
+
+      canvas.addEventListener("pointercancel", () => finishDrag(true));
+      canvas.addEventListener("lostpointercapture", () => finishDrag(true));
+
+      canvas.addEventListener("click", (event) => {
+        if (suppressCanvasClick) {
+          suppressCanvasClick = false;
+          return;
+        }
+        if (phase !== "aim") return;
+        const point = canvasPoint(event);
+        const player = players[currentPlayer];
+        const horizontalDistance = Math.abs(point.x - player.x);
+        const verticalDistance = player.y - 24 - point.y;
+        aims[currentPlayer].angle = clamp(Math.round(Math.atan2(verticalDistance, Math.max(1, horizontalDistance)) * 180 / Math.PI), 8, 82);
+        aims[currentPlayer].power = clamp(Math.round(Math.hypot(horizontalDistance, verticalDistance) / 7), 25, 100);
+        setStatus("Aim set — press SPACE or fire when ready.");
+        updateHud();
+      });
+
+      resetGame();
+      requestAnimationFrame(frame);
+    })();
+  </script>
+</body>
+</html>
