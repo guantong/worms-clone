@@ -203,7 +203,7 @@
 
     .controls {
       display: grid;
-      grid-template-columns: 1fr 1fr auto auto;
+      grid-template-columns: minmax(142px, 1fr) auto minmax(142px, 1fr);
       align-items: center;
       gap: 16px;
       padding: 15px 18px;
@@ -211,10 +211,27 @@
       background: #191e2b;
     }
 
-    .setting {
+    .aim-controls {
+      grid-column: 2;
+      grid-row: 1;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      gap: 9px;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .setting {
+      display: grid;
+      flex: 0 0 142px;
+      box-sizing: border-box;
+      justify-items: center;
+      gap: 6px;
+      width: 142px;
+      padding: 8px;
+      border: 1px solid #34394a;
+      border-radius: 8px;
+      background: #202534;
     }
 
     .setting-label {
@@ -222,6 +239,8 @@
       font-size: 11px;
       font-weight: 800;
       letter-spacing: .1em;
+      line-height: 1;
+      text-align: center;
     }
 
     .setting-value {
@@ -230,6 +249,39 @@
       font-weight: 800;
       text-align: center;
       font-variant-numeric: tabular-nums;
+    }
+
+    .setting-control {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 124px;
+      height: 36px;
+      box-sizing: border-box;
+      border: 1px solid #42485b;
+      border-radius: 7px;
+      background: #252b3b;
+    }
+
+    .setting-control .control-button {
+      min-width: 32px;
+      height: 32px;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .setting-control .control-button:first-child {
+      border-right: 1px solid #42485b;
+      border-radius: 6px 0 0 6px;
+    }
+
+    .setting-control .setting-value {
+      width: 52px;
+      box-sizing: border-box;
+      border-right: 1px solid #42485b;
+      white-space: nowrap;
     }
 
     .control-button {
@@ -266,16 +318,28 @@
       height: 42px;
       border: 0;
       border-radius: 11px;
-      background: linear-gradient(135deg, #a5f5c5, #69dba2);
-      color: #14241c;
+      background: linear-gradient(135deg, #ff7777, #e6424f);
+      color: #fff;
       font-size: 12px;
       font-weight: 1000;
       letter-spacing: .1em;
-      box-shadow: 0 4px 16px #7be9ad25;
+      box-shadow: 0 4px 16px #ed485025;
     }
 
     .fire-button:hover:not(:disabled) {
-      background: linear-gradient(135deg, #c2ffda, #7debb3);
+      background: linear-gradient(135deg, #ff9292, #f05b67);
+    }
+
+    .controls.green-turn #fireButton {
+      grid-column: 1;
+      grid-row: 1;
+      justify-self: start;
+    }
+
+    .controls #fireButton {
+      grid-column: 3;
+      grid-row: 1;
+      justify-self: end;
     }
 
     .footer {
@@ -347,25 +411,40 @@
         border-top: 1px solid #34394a;
       }
       .controls {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 13px;
         padding: 13px;
       }
       .setting { gap: 6px; }
-      .move-setting { grid-column: 1 / -1; }
-      .fire-button { grid-column: 1 / -1; width: 100%; }
       .footer { padding: 10px 13px 13px; }
+    }
+
+    @media (max-width: 900px) {
+      .controls { grid-template-columns: minmax(0, 1fr); }
+      .aim-controls {
+        grid-column: 1;
+        grid-row: 1;
+        gap: 13px;
+      }
+      .controls #fireButton {
+        grid-column: 1;
+        grid-row: 2;
+        width: 100%;
+        justify-self: stretch;
+      }
+      .controls.green-turn #fireButton {
+        grid-column: 1;
+        grid-row: 2;
+        width: auto;
+        justify-self: start;
+      }
     }
 
     @media (max-width: 430px) {
       .subtitle { font-size: 11px; }
       .brand-mark { width: 38px; height: 38px; }
       .round-pill { padding: 8px 9px; font-size: 9px; }
-      .setting { display: grid; grid-template-columns: minmax(0, 1fr) 30px 38px 30px; gap: 6px; }
-      .setting-label { grid-column: 1 / -1; margin-right: 0; }
-      .setting-value { grid-column: 3; grid-row: 2; }
-      .setting .control-button:last-of-type { grid-column: 4; grid-row: 2; }
-      .setting .control-button:first-of-type { grid-column: 2; grid-row: 2; }
+      .aim-controls { gap: 10px; }
       .footer { align-items: flex-start; }
       .key-hint { gap: 5px; }
       .footer-actions { gap: 6px; }
@@ -418,23 +497,31 @@
       </div>
 
       <div class="controls">
-        <div class="setting" aria-label="Angle controls">
-          <span class="setting-label">ANGLE</span>
-          <button class="control-button" data-action="angleDown" aria-label="Lower angle">−</button>
-          <span class="setting-value" id="angleValue">45°</span>
-          <button class="control-button" data-action="angleUp" aria-label="Raise angle">+</button>
-        </div>
-        <div class="setting" aria-label="Power controls">
-          <span class="setting-label">POWER</span>
-          <button class="control-button" data-action="powerDown" aria-label="Lower power">−</button>
-          <span class="setting-value" id="powerValue">72%</span>
-          <button class="control-button" data-action="powerUp" aria-label="Raise power">+</button>
-        </div>
-        <div class="setting move-setting" aria-label="Movement controls">
-          <span class="setting-label">MOVE</span>
-          <button class="control-button" data-move="-1" aria-label="Move left 20 pixels">←</button>
-          <span class="setting-value" id="moveValue">20 PX</span>
-          <button class="control-button" data-move="1" aria-label="Move right 20 pixels">→</button>
+        <div class="aim-controls">
+          <div class="setting" role="group" aria-label="Angle controls">
+            <span class="setting-label">ANGLE</span>
+            <div class="setting-control">
+              <button class="control-button" data-action="angleDown" aria-label="Lower angle">−</button>
+              <span class="setting-value" id="angleValue">45°</span>
+              <button class="control-button" data-action="angleUp" aria-label="Raise angle">+</button>
+            </div>
+          </div>
+          <div class="setting" role="group" aria-label="Power controls">
+            <span class="setting-label">POWER</span>
+            <div class="setting-control">
+              <button class="control-button" data-action="powerDown" aria-label="Lower power">−</button>
+              <span class="setting-value" id="powerValue">72%</span>
+              <button class="control-button" data-action="powerUp" aria-label="Raise power">+</button>
+            </div>
+          </div>
+          <div class="setting move-setting" role="group" aria-label="Movement controls">
+            <span class="setting-label">MOVE</span>
+            <div class="setting-control">
+              <button class="control-button" data-move="-1" aria-label="Move left 20 pixels">←</button>
+              <span class="setting-value" id="moveValue">20 PX</span>
+              <button class="control-button" data-move="1" aria-label="Move right 20 pixels">→</button>
+            </div>
+          </div>
         </div>
         <button class="control-button fire-button" id="fireButton">FIRE ROCKET&nbsp; ↗</button>
       </div>
@@ -467,6 +554,7 @@
       const powerValue = document.getElementById("powerValue");
       const moveValue = document.getElementById("moveValue");
       const fireButton = document.getElementById("fireButton");
+      const controls = document.querySelector(".controls");
       const windToggleButton = document.getElementById("windToggleButton");
       const newMapButton = document.getElementById("newMapButton");
       const statusText = document.getElementById("statusText");
@@ -563,6 +651,7 @@
         angleValue.textContent = `${aim.angle}°`;
         powerValue.textContent = `${aim.power}%`;
         moveValue.textContent = moveUsed ? "USED" : "20 PX";
+        controls.classList.toggle("green-turn", currentPlayer === 0);
         healthLabels.forEach((label, index) => {
           label.textContent = `${Math.max(0, players[index].health)} HP${players[index].alive ? "" : " · OUT"}`;
           label.style.color = players[index].alive ? "" : "#ff687f";
@@ -703,7 +792,7 @@
           const distance = Math.hypot(player.x - x, player.y - 25 - y);
           const reach = radius + 18;
           if (distance < reach) {
-            const damage = Math.max(1, Math.round(78 * (1 - distance / reach)));
+            const damage = Math.max(1, Math.round(20 * (1 - distance / reach)));
             player.health = Math.max(0, player.health - damage);
             const push = distance < 1 ? (index === 0 ? -1 : 1) : (player.x - x) / distance;
             player.vx += push * (2.5 + damage * 0.045);
