@@ -326,6 +326,20 @@
       box-shadow: 0 4px 16px #ed485025;
     }
 
+    .rocket-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      font-size: 13px;
+      line-height: 1;
+      letter-spacing: 0;
+      vertical-align: middle;
+    }
+
     .fire-button:hover:not(:disabled) {
       background: linear-gradient(135deg, #ff9292, #f05b67);
     }
@@ -523,7 +537,7 @@
             </div>
           </div>
         </div>
-        <button class="control-button fire-button" id="fireButton">FIRE ROCKET&nbsp; ↗</button>
+        <button class="control-button fire-button" id="fireButton">FIRE ROCKET&nbsp; <span class="rocket-icon" aria-hidden="true">🚀</span></button>
       </div>
 
       <div class="footer">
