@@ -725,7 +725,7 @@
         const survivor = players.findIndex((player) => !player.alive);
         if (survivor !== -1) {
           phase = "gameover";
-          setStatus(`${playerNames[1 - survivor]} takes the win. New map?");
+          setStatus(`${playerNames[1 - survivor]} takes the win. New map?`);
         } else {
           currentPlayer = 1 - currentPlayer;
           turnNumber += 1;
